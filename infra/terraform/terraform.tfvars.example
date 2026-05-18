@@ -1,0 +1,20 @@
+
+
+subscription_id = "YOUR-AZURE-SUBSCRIPTION-ID"
+
+project_name = "petclinic"
+environment  = "dev"
+location     = "eastus"
+
+vnet_cidr       = "10.10.0.0/16"
+aks_subnet_cidr = "10.10.1.0/24"
+vm_subnet_cidr  = "10.10.2.0/24"
+
+aks_node_count = 2
+aks_vm_size    = "Standard_B2s"
+vm_size        = "Standard_B2s"
+
+admin_username   = "azureuser"
+ssh_public_key   = "ssh-rsa YOUR_REAL_PUBLIC_KEY"
+allowed_ssh_cidr = "0.0.0.0/0"
+mysql_port       = 3306

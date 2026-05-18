@@ -1,0 +1,9 @@
+{
+  "name": "petclinic-main",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:tanderson001/petclinic-aks-newrelic-lab:ref:refs/heads/main",
+  "description": "GitHub Actions access for main branch",
+  "audiences": [
+    "api://AzureADTokenExchange"
+  ]
+}
