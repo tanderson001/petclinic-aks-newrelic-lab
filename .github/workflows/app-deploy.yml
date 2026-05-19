@@ -1,0 +1,72 @@
+name: App Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      ACR_NAME: petclinicdevacr
+      ACR_LOGIN_SERVER: petclinicdevacr.azurecr.io
+      AKS_CLUSTER_NAME: petclinic-dev-aks
+      AKS_RESOURCE_GROUP: petclinic-dev-rg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR login
+        run: az acr login --name $ACR_NAME
+
+      - name: Build jars and container images
+        run: ./mvnw clean install -DskipTests -P buildDocker -Ddocker.image.prefix=$ACR_LOGIN_SERVER
+        working-directory: app
+
+      - name: Push config-server image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-config-server
+
+      - name: Push discovery-server image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-discovery-server
+
+      - name: Push customers-service image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-customers-service
+
+      - name: Push vets-service image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-vets-service
+
+      - name: Push visits-service image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-visits-service
+
+      - name: Push api-gateway image
+        run: docker push $ACR_LOGIN_SERVER/spring-petclinic-api-gateway
+
+      - name: Get AKS credentials
+        run: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --overwrite-existing
+
+      - name: Deploy manifests
+        run: kubectl apply -f k8s/
+
+      - name: Check pods
+        run: kubectl get pods -n petclinic
+
+      - name: Check services
+        run: kubectl get svc -n petclinic
