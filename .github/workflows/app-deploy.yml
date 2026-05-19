@@ -68,8 +68,17 @@ jobs:
       - name: Get AKS credentials
         run: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --overwrite-existing
 
+      - name: Create namespace
+        run: kubectl apply -f k8s/namespace.yaml
+
       - name: Deploy manifests
-        run: kubectl apply -f k8s/
+        run: |
+          kubectl apply -f k8s/config-server.yaml
+          kubectl apply -f k8s/discovery-server.yaml
+          kubectl apply -f k8s/customers-service.yaml
+          kubectl apply -f k8s/vets-service.yaml
+          kubectl apply -f k8s/visits-service.yaml
+          kubectl apply -f k8s/api-gateway.yaml
 
       - name: Check pods
         run: kubectl get pods -n petclinic
