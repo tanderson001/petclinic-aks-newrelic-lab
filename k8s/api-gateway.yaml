@@ -23,6 +23,13 @@ spec:
               value: http://config-server:8888
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: http://discovery-server:8761/eureka/
+            - name: NEW_RELIC_APP_NAME
+              value: petclinic-api-gateway
+            - name: NEW_RELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: newrelic-license
+                  key: NEW_RELIC_LICENSE_KEY
 ---
 apiVersion: v1
 kind: Service

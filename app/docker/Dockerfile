@@ -12,6 +12,15 @@ ARG EXPOSED_PORT
 EXPOSE ${EXPOSED_PORT}
 
 ENV SPRING_PROFILES_ACTIVE=docker
+ENV JAVA_TOOL_OPTIONS="-javaagent:/application/newrelic/newrelic.jar"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL -o /tmp/newrelic-java.zip https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip \
+    && unzip -q /tmp/newrelic-java.zip -d /application \
+    && rm -f /tmp/newrelic-java.zip
 
 COPY --from=builder application/dependencies/ ./
 

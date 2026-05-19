@@ -21,6 +21,13 @@ spec:
           env:
             - name: CONFIG_SERVER_URL
               value: http://config-server:8888
+            - name: NEW_RELIC_APP_NAME
+              value: petclinic-discovery-server
+            - name: NEW_RELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: newrelic-license
+                  key: NEW_RELIC_LICENSE_KEY
 ---
 apiVersion: v1
 kind: Service

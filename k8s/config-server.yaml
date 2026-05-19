@@ -18,6 +18,14 @@ spec:
           image: petclinicdevacr.azurecr.io/spring-petclinic-config-server
           ports:
             - containerPort: 8888
+          env:
+            - name: NEW_RELIC_APP_NAME
+              value: petclinic-config-server
+            - name: NEW_RELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: newrelic-license
+                  key: NEW_RELIC_LICENSE_KEY
 ---
 apiVersion: v1
 kind: Service

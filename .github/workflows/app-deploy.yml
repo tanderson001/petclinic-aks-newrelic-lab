@@ -73,6 +73,7 @@ jobs:
 
       - name: Deploy manifests
         run: |
+          kubectl apply -f k8s/newrelic-secret.yaml
           kubectl apply -f k8s/config-server.yaml
           kubectl apply -f k8s/discovery-server.yaml
           kubectl apply -f k8s/customers-service.yaml
