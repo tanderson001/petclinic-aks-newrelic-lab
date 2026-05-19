@@ -37,6 +37,10 @@ jobs:
       - name: ACR login
         run: az acr login --name $ACR_NAME
 
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+        working-directory: app
+
       - name: Build jars and container images
         run: ./mvnw clean install -DskipTests -P buildDocker -Ddocker.image.prefix=$ACR_LOGIN_SERVER
         working-directory: app
