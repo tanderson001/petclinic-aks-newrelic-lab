@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RequestPredicates;
@@ -37,9 +36,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import java.io.IOException;
 import java.time.Duration;
-import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -68,45 +65,18 @@ public class ApiGatewayApplication {
     @Value("classpath:/static/index.html")
     private Resource indexHtml;
 
-    @Value("${NEW_RELIC_BROWSER_ACCOUNT_ID:8065704}")
-    private String newRelicBrowserAccountId;
-
-    @Value("${NEW_RELIC_BROWSER_TRUST_KEY:8065704}")
-    private String newRelicBrowserTrustKey;
-
-    @Value("${NEW_RELIC_BROWSER_AGENT_ID:1431931403}")
-    private String newRelicBrowserAgentId;
-
-    @Value("${NEW_RELIC_BROWSER_APPLICATION_ID:1431931403}")
-    private String newRelicBrowserApplicationId;
-
-    @Value("${NEW_RELIC_BROWSER_LICENSE_KEY:NRJS-e39c692cdb660644855}")
-    private String newRelicBrowserLicenseKey;
-
     /**
      * workaround solution for forwarding to index.html
      * @see <a href="https://github.com/spring-projects/spring-boot/issues/9785">#9785</a>
      */
     @Bean
     RouterFunction<?> routerFunction() {
-        return RouterFunctions.route(RequestPredicates.GET("/"),
+        RouterFunction<?> resources = RouterFunctions.resources("/**", new ClassPathResource("static/"));
+        RouterFunction<?> indexRoute = RouterFunctions.route(RequestPredicates.GET("/"),
             request -> ServerResponse.ok()
                 .contentType(MediaType.TEXT_HTML)
-                .bodyValue(renderIndexHtml()));
-    }
-
-    private String renderIndexHtml() {
-        try {
-            String html = StreamUtils.copyToString(indexHtml.getInputStream(), StandardCharsets.UTF_8);
-            return html
-                .replace("__NEW_RELIC_BROWSER_ACCOUNT_ID__", newRelicBrowserAccountId)
-                .replace("__NEW_RELIC_BROWSER_TRUST_KEY__", newRelicBrowserTrustKey)
-                .replace("__NEW_RELIC_BROWSER_AGENT_ID__", newRelicBrowserAgentId)
-                .replace("__NEW_RELIC_BROWSER_APPLICATION_ID__", newRelicBrowserApplicationId)
-                .replace("__NEW_RELIC_BROWSER_LICENSE_KEY__", newRelicBrowserLicenseKey);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Unable to load api-gateway index.html", ex);
-        }
+                .bodyValue(indexHtml));
+        return resources.andOther(indexRoute);
     }
 
     /**
