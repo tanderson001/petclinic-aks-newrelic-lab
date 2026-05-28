@@ -37,6 +37,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.nio.charset.StandardCharsets;
 
@@ -96,14 +97,18 @@ public class ApiGatewayApplication {
         return router;
     }
 
-    private String renderIndexHtml() throws Exception {
-        String html = StreamUtils.copyToString(indexHtml.getInputStream(), StandardCharsets.UTF_8);
-        return html
-            .replace("__NEW_RELIC_BROWSER_ACCOUNT_ID__", newRelicBrowserAccountId)
-            .replace("__NEW_RELIC_BROWSER_TRUST_KEY__", newRelicBrowserTrustKey)
-            .replace("__NEW_RELIC_BROWSER_AGENT_ID__", newRelicBrowserAgentId)
-            .replace("__NEW_RELIC_BROWSER_APPLICATION_ID__", newRelicBrowserApplicationId)
-            .replace("__NEW_RELIC_BROWSER_LICENSE_KEY__", newRelicBrowserLicenseKey);
+    private String renderIndexHtml() {
+        try {
+            String html = StreamUtils.copyToString(indexHtml.getInputStream(), StandardCharsets.UTF_8);
+            return html
+                .replace("__NEW_RELIC_BROWSER_ACCOUNT_ID__", newRelicBrowserAccountId)
+                .replace("__NEW_RELIC_BROWSER_TRUST_KEY__", newRelicBrowserTrustKey)
+                .replace("__NEW_RELIC_BROWSER_AGENT_ID__", newRelicBrowserAgentId)
+                .replace("__NEW_RELIC_BROWSER_APPLICATION_ID__", newRelicBrowserApplicationId)
+                .replace("__NEW_RELIC_BROWSER_LICENSE_KEY__", newRelicBrowserLicenseKey);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to load api-gateway index.html", ex);
+        }
     }
 
     /**
